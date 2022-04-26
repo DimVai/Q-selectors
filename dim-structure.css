@@ -1,0 +1,284 @@
+
+:root {
+	--xxs: 288px;
+	--xs: 384px;
+	--sm: 576px;
+	--md: 768px;
+	--lg: 992px;
+	--xl: 1200px;
+	--xxl: 1400px;
+  }
+
+
+/**********************************             SLIM CONTAINERS              ********************************/
+
+/* ΠΡΟΤΑΣΗ: κι άλλα πιο μικρά */
+
+.xxs{
+	max-width: var(--xxs);
+}
+.xs{
+	max-width: var(--xs);
+}
+.sm{
+	max-width: var(--sm);
+}
+.md{
+	max-width: var(--md);
+}
+.lg{
+	max-width: var(--lg);
+}
+
+
+/****************          BUTTONS WITH OPENING SUB-MENUS OR OPENING SUB-DIVS           **********************/
+
+/*Ο πατέρας div θα έχει class OpenChildrenOnClick ή OpenChildrenOnHover που περιλαμβάνει 2 στοιχεία
+	*) κάποιο button που θα φαίνεται πάντα (αν θέλουμε εικόνα για κουπμί, τη βάζουμε μέσα σε button με .btn-no-decor) 
+	και θα κάνει trigger (δεν μας νοιάζει το class)
+	*) και ένα παιδί του πατέρα (πχ div ή nav) που θέλουμε να ανοίγει, με class DropdownArea
+	Σημείωση: Αν πρόκειται για μενού που θέλουμε να κλείνει αφού πατήσεις το menu item, 
+	αυτό δεν γίνεται με css. Χρειάζεται jQuery για να γίνει. Τώρα, το μενού κλείνει όταν φύγει το ποντίκι (όχι όταν γίνει κλικ)
+	*/
+
+.OpenChildrenOnClick, .OpenChildrenOnHover{position: relative;}    /*ώστε τα παιδιά του να έχουν position absolute, αλλιώς δεν εφαρμόζεται*/
+.DropdownArea{
+	position: absolute;			/*Αλλιώς, αν πιάνει πολύ χώρο το μενού, θα πιάνει και το κουμπί του μενού χωρίς λόγο!!!*/
+	visibility: hidden;
+	opacity: 0;
+	transition: 0.5s ease-out;
+}
+
+ /*OpenChildrenOnClick είναι το εξωτερικό div. Μπαίνει από πάνω και περιλαμβάνει το button που κάνει το trigger 
+ και το υπομενού που ανοιγοκλείνει*/
+/*focus-within είναι όταν κάνεις κλικ σε κάποιο παιδί του 
+(το παιδί του πρέπει να παίρνει το focus στο κλικ. Πχ ναι τα κουμπιά και links, όχι ο "κενός" χώρος του div, όχι οι εικόνες)*/
+.OpenChildrenOnClick:focus-within .DropdownArea, 
+.OpenChildrenOnHover:hover .DropdownArea, 
+.DropdownArea:hover 	
+{visibility:visible;opacity:1;}
+
+/*To OpenChildrenOn* να μην έχει .center-contents γιατί, ως flex, χαλάει τα positions που χαλάνε το χώρο...*/
+/*Αν θέλουμε να αλλάξουμε την εμφάνιση του trigger κουμπιού κατά το hover ώστε να μένει hovered ώντας ο κέρσορας και στο υπομενού,
+φτιάχνουμε σε css τον κανόνα  ".DropdownArea:hover .trigger-btn {}", αντί για τον σκέτο ".trigger-btn:hover{}"
+*/
+
+
+  
+/***************************************              DIM CENTERING            **************************************/
+
+/* ΠΡΟΤΑΣΗ: center, center-x, center-xy, */
+
+/* τοποθέτηση στο κέντρο της γραμμής για div ή image, και στοίχιση κειμένου στο κέντρο για κείμενο */
+.center{    
+	display: block;					/* important for everything */
+	margin-inline: auto !important; /* centers if this is image or div*/
+	text-align: center;				/* centers if this is text */
+}
+/* to be avoided - κέντρο ως προς τον πατέρα του αγνοώντας τo χώρο που πιάνουν τα αδέλφια του, άρα ούτως ή άλλως πρέπει να μπει σε ξεχωριστό div */
+/* .centered {position: relative;top: 50%; left: 50%; transform: translate(-50%, -50%);} */
+
+/* Τοποθέτηση περιεχομένων στο κέντρο, ως προς τον οριζόντιο άξονα. Αν είναι πολλά, μπαίνουν το ένα κάτω από το άλλο. 
+Προσοχή: Τοποθέτηση, όχι στοίχιση (πχ κειμένου με πολλές γραμμές). Βλ. center παραπάνω για στοίχιση. 
+Αν το ύψος του αντικειμένου είναι (καθορισμένα) μεγαλύτερο από τα περιεχόμενα του, τότε αυτά τοποθετούνται στο κέντρο και ως προς τον κατακόρυφο άξονα */
+.center-contents{
+	display: grid;              /*(το grid έχει το ίδιο αποτέλεσμα με το flex:space-around) */
+	place-items: center;
+}
+/* center only on x axis */
+.center-contents-top{         
+    display: flex;					
+	flex-direction: column;	 		/* column=vertically - one line per item */	
+	/*justify-content: space-around; 	/* center vertically - H στοίχηση των παιδιών σαν σύνολο (εφαρμόζεται μόνο αν το ύψος είναι μεγαλύτερο από το ύψος των περιεχομένων) */
+	align-items: center;				/* center horizontally - Αυτό που θέλουμε βασικά */
+	/* το alight items είναι ο άλλος άξονας από το flex direction και είναι η στοίχιση του κάθε παιδιού ξεχωριστά */
+}
+
+
+/***************************************              DIM INLINE             **************************************/
+
+/* ΠΡΟΤΑΣΗ: inline-xy-md, inline-y-md, inline-contents-xy-md, inline-middle-lg */
+
+/* Θυμίζω το class^=something πιάνει μόνο αν όλο το class attribute ξεκινάει με something* όχι αν μια από τις κλάσσεις ξεκινάει με something*... */
+
+/* Τοποθέτηση (κι εδώ όχι στοίχιση) περιεχομένων στο κέντρο. Αν είναι πολλά, μπαίνουν όλα στην ίδια γραμμή.*/
+[class*="inline-contents"]{				/* Θυμίζω το class^=something πιάνει μόνο αν ΟΛΟ το class attribute ξεκινάει με something* */
+	display: flex;
+	flex-flow: row wrap;			/* row=horizontally - all in same line if they fit */
+	justify-content: space-around;	/* center horizontally - αντίστροφα από την άλλη κλάση - αυτό που θέλουμε βασικά */
+    align-items: center;			/* center vertically - αντίστροφα από την άλλη κλάση - στοίχηση και κατακόρυφα, στον άλλο άξονα δηλαδή */
+}
+[class*="inline-contents-top"]{				/* πχ  center-contents-md-inline-middle */
+    align-items: start;			/* center vertically - αντίστροφα από την άλλη κλάση - στοίχηση και κατακόρυφα, στον άλλο άξονα δηλαδή */
+}
+@media (max-width: 768px) {.inline-contents-md, .inline-contents-top-md {flex-direction: column !important; align-items: center;}}		
+@media (max-width: 992px) {.inline-contents-lg, .inline-contents-top-lg {flex-direction: column !important; align-items: center;}}	
+/* inline (στήλες) σε μεσαίες ή/και μεγάλες οθόνες, center στα κινητά. Τα important είναι απαραίτητα αν δεν μπει όλο αυτό στο τέλος του css */
+
+
+
+/********************************              STANDARD INLINE STRUCTURES                *****************************/
+
+/* standard-inline-3-structure: 
+Οριζόντια δομή με 3 παιδιά. Ένα στοιχησμένο αριστερά, ένα κέντρο και ένα δεξιά. Χρησιμο για navigation bar
+standard-inline-2-structure: Δύο παιδιά, αριστερά-δεξιά. 
+*/
+
+
+
+/*ΠΡΟΤΑΣΗ: inline-full-3, inline-standard-3, inline-bar-3 */
+
+.standard-inline-3 {
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
+	align-items: center; 
+}
+.standard-inline-2 {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	align-items: center; 
+}
+[class*=standard-inline] > *:first-child {          
+	justify-self: start;
+	overflow: hidden;
+}
+[class*=standard-inline] > *:last-child {
+	text-align: right;
+  	justify-self: end;
+}
+
+
+/***********************************        EQUAL COLUMNS  &  TEXT COLUMNS        ******************************************/
+ 
+[class*=equal-columns]{
+	display: grid;
+	grid-auto-flow: column;
+	grid-auto-columns: 1fr;
+	gap: 2vmax;
+}
+[class*=equal-columns] > * {overflow: hidden}
+@media (max-width: 768px) { .equal-columns-md{grid-auto-flow: row} }
+@media (max-width: 992px) { .equal-columns-lg{grid-auto-flow: row} }
+
+/* for single block of text - divide it into columns */
+.columns{
+	column-count: 3;	 /* max columns */
+	column-width: 45ch;  /* min-width, 2 columns if large font, 3 if normal */
+	column-gap: 3em;
+}
+
+ 
+/*****************************************              GALLERY           ******************************************/
+
+/*Χρειάζεται max-width ή και min-width στα παιδιά του. Όχι width γιατί δεν θα παίζει σίγουρα στα κινητά. */
+/*Αν πρέπει τα παιδιά να μεγαλώνουν ώστε να πιάνουν όλη την οθόνη, να χρησιμοποιηθεί το gallery-grid */ 
+.gallery-flex{
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: space-around;
+	gap: var(--galleryItemsGap, 2vw);
+}
+.gallery-flex > * {
+	flex: 1 0 var(--galleryItemMinWidth, 300px);
+	max-width: var(--galleryItemMaxWidth, 1920px);
+}
+.gallery-grid{
+	display: grid;
+	justify-content: center;  /*χρήσιμο για κινητά*/ 
+	justify-items: center;	  /*χρήσιμο όταν περιορίζεις τα παιδιά του με max-width, αυτά να είναι κεντραρισμένα*/
+	gap: var(--galleryItemsGap, 2vw);
+	grid-template-columns: repeat(auto-fit, minmax(var(--galleryItemMinWidth, 300px), 1fr));
+}
+.gallery-grid > * {
+	max-width: var(--galleryItemMaxWidth, 1920px);
+}
+.gallery-flex img, .gallery-grid img{
+	max-width: 100%;
+	height: auto;
+}
+
+/*Βάλε max-width ή/και height, max-height ή/και center-conmtents στα παιδιά του αν απαιτείται*/
+/*Ακόμα και αν βάζεις μόνο εικόνες, καλύτερα τα παιδιά του να είναι div και μέσα στο div να μπαίνουν οι εικόνες*/
+
+
+
+
+/************************************   Images   ***************************************/
+
+/*Lazy loading*/
+img[data-src][data-lazy="#"]{opacity: 0;}
+
+
+
+
+
+/**********************************          SCROLLING          **********************************/
+
+/*έτοιμος κώδικας από w3schools.com */
+/* To (bootstrap) container πρέπει να είναι ΜΕΣΑ στο scrollable (όχι στο ίδιο div) για να σκρολλάρεις και όταν είσαι πολύ πλάγια 
+Πχ chordpage HTML: 
+<main class="landing-page scrollable ">
+	<div class="container-lg bg-lavender py-1">
+	</div>
+</main> 
+*/
+
+
+/*.scrollable: όχι μπάρες, αλλά scroll με το ποντίκι. .no-scrollable: ούτε μπάρες, ούτε με ποντίκι*/
+.scrollable {
+	overflow-y: scroll; /* Add the ability to scroll */
+	-ms-overflow-style: none;  /* Hide scrollbar - IE and Edge */
+	scrollbar-width: none;  /* Hide scrollbar - Firefox */
+  }
+.scrollable::-webkit-scrollbar { /* Hide scrollbar - Chrome, Safari and Opera */
+	  display: none;
+	  scrollbar-width: none;
+  }
+.no-scrollable{
+	-ms-overflow-style: none;  /* Hide scrollbar - IE and Edge */
+	scrollbar-width: none;  /* Hide scrollbar - Firefox */
+  }
+.no-scrollable::-webkit-scrollbar {
+	display: none;
+	scrollbar-width: none;
+  }
+.scrollable-bars{
+	overflow-y: scroll; /* Add the ability to scroll with scrollbars*/
+}
+
+/*Δεν χρησιμοποιείται στο chordpage - να προτιμάται το flexbox*/
+.sticky {
+	z-index: 999;
+	position: sticky;
+	top: 0;
+	/* width: 100%; */
+  }  
+
+  /*χωρίζεις το κείμενο σε span που το κάθε span είναι text-nowrap, δηλαδή, οι λέξεις του κάθε span είναι όσο γίνεται στην ίδια γραμμή*/
+.unseparated {
+    white-space: nowrap !important;
+}
+
+
+
+
+/************************************        SURPIRZE         ***************************************/
+
+#the-at:after{content:"@";}
+#surprize:hover #the-at {display:none;}
+.blof{display:none;}
+
+
+
+
+/**********************************        DARK MODE         ********************************/
+
+
+.dark-mode .darkable{
+	filter: invert(100%) hue-rotate(200deg);
+}
+
+.dark-mode .noDark{
+	filter: invert(100%) hue-rotate(-20deg);
+}
+

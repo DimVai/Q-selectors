@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Dim lightGen</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <!-- <link rel="stylesheet" media="screen" href="/dim-structure.css"> -->
+
+    <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script> -->
+    <script src="../lightgen.js"></script>
+
+</head>
+<body>
+<div class="container m-5">
+
+
+<my-counter count="21" color="seagreen" size="200" class="center"></my-counter>
+
+<hr>
+
+<button class="btn btn-info m-3" onclick="changeColorAndEnableDelete()">Let's get dangerous</button>
+<bs-alert id="bsAlert" test="something" author="Dimitris" enable-delete="false" separated-verb="check">those fields</bs-alert>
+
+
+<script>
+
+    let countTemplate = /*html*/`
+        <style>             
+            my-counter * {
+                font-size: {size}%;
+            }
+            my-counter span {
+                width: 4rem;
+                display: inline-block;
+                text-align: center;
+            }
+            my-counter button { 
+                cursor: pointer;
+                width: 4rem;
+                height: 4rem;
+                border: none;
+                border-radius: 10px;
+                color: white;
+                background-color: {color};       
+                /* try using alt+arrows to move this line up/down to see the coloring BUG that the add-in es6-string-html has due to non correct syntax in {color} (using brackets). move also that line to see. Another way to solve is to use an empty {} after the bug line, or use {color\} isteaad of {color} */
+            }         
+            </style>
+
+            <button id="dec" class="dec">-</button>
+            <span>{count}</span>
+            <button id="inc" class="inc">+</button>
+    `;
+
+    GenerateCustomElement({
+        element: "my-counter",
+        attributes: ['size'],           // "silent" attributes.
+        state: ['count','color'],       // Attributes that cause element to re-render on change.
+        defaultValues: {count:0},       // default values for attributes
+        template: countTemplate,
+        onRender: function(element){      // use "element", avoid "this", avoid using id's
+            element.querySelector(".inc").addEventListener('click',function(){
+            element.count++;
+            element.color = "blue";
+            });
+            element.querySelector(".dec").addEventListener('click',function(){
+            element.count--;
+            element.color = "darkred";
+            });
+        },
+    });
+
+    GenerateCustomElement({
+        element: "bs-alert",
+        attributes: ["separated-verb", "author"],        // "silent" attributes.
+        state: ["enable-delete", 'color'],                // Attributes that cause element to re-render on change.
+        defaultValues: {color:'info', author:"Mitsos"},   // default values for attributes
+        fullRenderOnChange: true,               // optional. use only if there is an error, for example eventListeners do not work
+        template:                      // use {slot} or {slot/} also
+            /*html*/`
+            <div class="alert alert-{color} alert-dismissible fade show" role="alert">
+            <p><strong>Holy guacamole!</strong> You should {separated-verb} in on some of <slot /> below. 
+            Remember, {slot} are great! by {author}.</p>
+            <button type="button" class="btn-close d-none" data-bs-dismiss="alert"></button>
+            </div>`,
+        onRender: function(element){     // this=the element.
+            //let element = this;   // do this everytime, because eventlisteners follow!
+            if (element['enable-delete']=="true")   //needs to be string...
+            {
+                let closeButton = element.querySelector('.btn-close');
+                closeButton.classList.remove('d-none');  
+                closeButton.addEventListener('click',function(event){
+                    this.parentElement.style.display = "none";    //this is the button
+                });
+            }
+        },
+    });
+
+    function changeColorAndEnableDelete(){
+        bsAlert.color = (bsAlert.color=="danger") ? "primary" : "danger";
+        bsAlert["enable-delete"] = (bsAlert["enable-delete"]=="true") ? "false" :"true";
+    }
+
+</script>
+<br>
+<br>
+
+
+</div>
+</body>
+</html>
