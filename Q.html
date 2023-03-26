@@ -7,7 +7,7 @@
     
     <title>Q</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> -->
     <link rel="stylesheet" media="screen" href="/dim-structure.css">
 
     <!-- <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
@@ -15,6 +15,9 @@
     <script defer src="Q.js"></script>
 
     <style>
+        :root{
+            --dimValue: 1.3;
+        }
         body{
             background-color: black;
             color: white;
@@ -34,13 +37,27 @@
 
         <div class="center-contents" id="output">the output element</div>
         <input type="text" id="inputArea" name="fname"/>
-        <p>try this in console: <br>
+        <p>try this in console: 
+            <br>
             Q('#inputArea').on('keyup',function(e){console.log(e.key,Q('inputArea').value)},500)
-            Q('.equality').fetch('https://www.boredapi.com/api/activity', "json", data=&gtdata.activity)<br>
-            Q('#inputArea').set('12').display(true)<br>
-            Q('.equality').set("alter")<br>
-            Q('.equality').each.innerText = "new alter"<br>
-            Q('.equality').each.id<br>
+            <br>
+            Q('.equality').fetch('https://www.boredapi.com/api/activity', "json", data=&gtdata.activity)
+            <br>
+            Q('.equality').on('click',function(e){console.log(e.target)},"live")
+            <br>
+            Q('#inputArea').set('12').display(true)
+            <br>
+            Q('.equality').set("alter")
+            <br>
+            Q('.equality').each.innerText = "new alter"
+            <br>
+            Q('.equality').each.id
+            <br>
+            Q.load('testing.js').then(function(){console.log("lalala")})
+            <br>
+            Q.load('https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css',{crossOrigin:"anonymous"}).then(function(){console.log("lalala")}).catch(function(){console.log("still lalala")})
+            <br>
+            Q('--dimValue').set('3.2')
             <br>
 
         </p>

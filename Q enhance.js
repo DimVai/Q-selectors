@@ -1,32 +1,24 @@
 
 /**
- * @file Q.js
+ * @file Qenhance.js
  * @author Dimitris Vainanidis
  * @copyright Dimitris Vainanidis, 2022
  */
 
-/* jshint ignore:start */
+
 'use strict';
 
 
-
-/** Returns the selected DOM elements, by ID, class, e.t.c. */
-window.Q = function(selector){
+globalThis.Q = function(selector){
     if ( document.getElementById(selector) ) {
         return document.getElementById(selector);
     }
     if ( typeof(selector) == 'string' ) {
-        if (selector.startsWith('--')){return new Qcp(selector)}        // css custom property
         let modifiedSelector = (selector.charAt(0)=='~') ? '[data-variable=' + selector.substring(1) + ']' : selector;
-        let q = Qarray.from([...document.querySelectorAll(modifiedSelector)]);
-        q.selector = modifiedSelector;
-        q.each = Q.eachProxy(q); 
-        return q;
+        return Q.enhance([...document.querySelectorAll(modifiedSelector)],selector);
     } 
     if ( ( selector instanceof HTMLElement ) || [document,window].includes(selector) ) {
-        let q = Qarray.from([selector]);
-        q.selector = selector;
-        return q;
+        return Q.enhance([selector],selector);
     } 
     if ( Array.isArray(selector) ) {        // probably already a Qarray, e.g Q(Q(...).bar).foo 
         return selector;
@@ -34,51 +26,44 @@ window.Q = function(selector){
 };
 
 
-class Qcp {
-    constructor(property){
-        this.property = property;
-        this.value = getComputedStyle(document.documentElement,null).getPropertyValue(property);
-    }
-    set(value){
-        this.value = value;
-        document.documentElement.style.setProperty(this.property, value);
-        return this;
-    }
-}
 
 
-class Qarray extends Array{
-    constructor(...items) { 
-        super(...items) ;
-    } 
 
-    #displayOneIf(element,condition=true ) {
+
+Q.enhance = function(array,selector){
+    // if it is already a Qarray, it already has a selector, each e.t.c.
+    array.selector ??= selector;        // jshint ignore:line
+    array.each ??= Q.eachProxy(array);  // jshint ignore:line
+    return Object.assign(array,this.methods);       
+};
+
+
+Q.methods = {
+
+    displayOneIf(element,condition=true ){
         element.style.display = ( condition===true || ( (condition instanceof Function) && condition(element) ) )  ?"":"none";
-    }
-    display(condition){this.forEach(el=>this.#displayOneIf(el,condition));return this}       
+    },
+    display(condition){this.forEach(el=>this.displayOneIf(el,condition));return this},        
     
-    toggleClass(className,condition){this.forEach(el=>el.classList.toggle(className,condition));return this}
+    toggleClass(className,condition){this.forEach(el=>el.classList.toggle(className,condition));return this},
 
-    #setOne(element,content,html) {         
-        (element.nodeName=='INPUT')?element.value=content:      // threesome syntax
+    setOne(element,content,html) {         // threesome syntax
+        (element.nodeName=='INPUT')?element.value=content:
         html?element.innerHTML=content:
         element.textContent=content;
-    }
-    set(content,html=false){this.forEach(el=>this.#setOne(el,content,html));return this}
+    },
+    set(content,html=false){this.forEach(el=>this.setOne(el,content,html));return this},
 
-    // parameter = null/ommited | "live" | "once" | number -> debounce rate
     on(event,callback,parameter=null) {        
         if (!parameter){
             this.forEach(el=>el.addEventListener(event,callback));
-        } else if ( parameter=="live" ) {
+        } else if ( ["live","global"].includes(parameter) ) {
             document.addEventListener(event,(e)=>{
                 if ( e.target.matches(this.selector) ) {
                     callback(e);
                 }
             });
-        } else if (parameter=="once") {
-            this.forEach(el=>el.addEventListener(event,callback,{once:true}));
-        } else if (parameter>=1){
+        } else if (parameter>10){
             let debounceRate = parameter;
             let Qdebounce = (callbackFunction, delay=400) => {
                 let timeout;
@@ -93,26 +78,25 @@ class Qarray extends Array{
             });   
         }
         return this;
-    }
+    },
 
-    // type: "text" | "json" | "html"
-    async fetch(URL,type="text",pathFunction=null) {      
+    async fetch(URL,type="text",pathFunction=null){      // type: "text", "json", "html"
         return fetch(URL) 
             .then(response=>{return type=="json"?response.json():response.text()})
             .then(data=>type=="html"?this.each.innerHTML=data:this.set(pathFunction?pathFunction(data):data))
             .then(()=>this);      // github copilot!
-    }
+    },
 
-    async post(URL,parameterName) {
+    async post (URL,parameterName){
         return fetch(URL, {
             method:'POST', 
             headers:{'Content-Type':'application/json'}, 
             body:JSON.stringify({[parameterName]:this[0].value}) 
         });
         // it is more useful to return the response from the server, not the element itself. 
-    }
+    },
 
-    onKeyboardPress(callback) {
+    onKeyboardPress(callback){
         let KeyString = (keyEvent) => {
             let key = keyEvent.key.replace("Control", "Ctrl"); 
             if (!keyEvent.ctrlKey && !keyEvent.altKey) {return key}   
@@ -127,9 +111,14 @@ class Qarray extends Array{
             callback(KeyString(keyEvent));
         }));
         return this;
-    }
+    },
 
-}
+    // each: new Proxy(this, { ... }), παλιός τρόπος. Όμως, δεν δουλεύει το this μέσα σε property (παρά μόνο μέσα σε method)
+    // υπάρχει και αλλος τρόπος ορισμού property, με get each() (το οποίο δημιουργεί .each property με βάση function)
+    // Όμως, τώρα το this είναι το Q.methods, όχι το Qarray διότι (εφόσον το each δεν θα είναι method αλλά property) το "this"
+    // γίνεται evaluate τώρα που θα οριστεί, όχι όταν εκτελεστεί... Θα δούλευε αν έμπαινε απευθείας στο object και όχι με Object.assign 
+    
+};
 
 Q.eachProxy = (Qarray) => {
     return new Proxy(Qarray, {                  // προσοχή, το each επηρεάζει το fetch με html (όχι με set),    
@@ -143,48 +132,5 @@ Q.eachProxy = (Qarray) => {
             return value;
         },
     });
-};
-
-
-
-
-
-/**
- * Loads a .CSS or .JS file.
- * @param {URL} resourceURL Path of .js or .css file
- * @param {object} attributes Javascript-ish attributes. E.g.: crossOrigin, not crossorigin  
- */
-Q.load = (resourceURL, attributes={}) => {
-    if (Array.isArray(resourceURL)) {         // if array, do for each
-        return Promise.all(resourceURL.map(resource=>Q.load(resource,attributes)));
-    }
-    let resourceExtention = resourceURL.split('.').pop();       //CSS or JS?
-    switch (resourceExtention) {
-        case 'css':   //remember that a new css overrides old css!!!
-            return new Promise((resolve,reject) => {
-                let css = document.createElement('link');
-                css.type = "text/css";
-                css.rel = "stylesheet";
-                css.media = "screen,print";
-                css.href = resourceURL;
-                Object.assign(css,attributes);
-                css.onload = resolve;
-                css.onerror = reject;
-                document.querySelector("head").appendChild( css );      // head[0]...
-            });
-        case 'js':
-            return new Promise((resolve,reject) => {
-                let js = document.createElement('script');
-                js.type = "text/javascript";
-                js.setAsrcttribute = resourceURL;
-                js.defer = true;
-                Object.assign(js,attributes);
-                js.onload = resolve;
-                js.onerror = reject;
-                document.body.appendChild( js );
-            });
-        default:
-            break;
-        }
 };
 

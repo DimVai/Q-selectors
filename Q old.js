@@ -1,4 +1,25 @@
+/* jshint ignore:start */
 'use strict';
+
+
+
+/**
+ * Wait for a condition to be met and, only then, continue execution of function. 
+ * Use only inside async function or variable.
+ * Use this way: await until(_=> flag == true);
+ * @param {boolean|Function} condition Use a boolean variable or a function (that returnes true/false). Do not use condition or expression!
+ * @returns {Promise} 
+ */
+ Q.until = condition => { 
+    let checkCondition = (condition instanceof Function)?condition:()=>condition;
+    const poll = resolve => {      // needs a name to re-call itself
+        if (checkCondition()) {resolve()}
+        else {setTimeout(_=>poll(resolve), 200)}
+    };
+    return new Promise(poll);
+};
+
+
 
 
 
@@ -45,7 +66,7 @@ class Qarray extends Array{
             });
             return this;
         }
-    }; 
+    } 
 
     async fetch(URL,type="text",pathFunction){      // type: "text", "json", "html"
         return fetch(URL) 
